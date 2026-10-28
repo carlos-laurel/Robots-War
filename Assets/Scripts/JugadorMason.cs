@@ -194,6 +194,8 @@ public class JugadorMason : MonoBehaviour
 
     public void RecibirDano(int cantidad)
     {
+        //return;
+
         if (vida <= 0) return;
 
         vida -= cantidad;
