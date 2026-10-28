@@ -33,6 +33,8 @@ public static class ConstructorJuego
     //  1. IMPORTACION
     // =====================================================================
     [MenuItem("Aura/1. Ajustar importacion del arte")]
+    [System.Obsolete]
+
     public static void AjustarImportacion()
     {
         string[] guids = AssetDatabase.FindAssets("t:Texture2D", new string[] { "Assets/SpriteSheets" });
@@ -58,6 +60,8 @@ public static class ConstructorJuego
     //  2. CONSTRUIR TODO
     // =====================================================================
     [MenuItem("Aura/2. Construir juego completo")]
+    [System.Obsolete]
+
     public static void ConstruirTodo()
     {
         AjustarImportacion();
