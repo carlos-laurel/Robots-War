@@ -38,6 +38,7 @@ public class JefeNucleo : MonoBehaviour
         posicionInicial = transform.position;
     }
 
+    [System.Obsolete]
     void Start()
     {
         JugadorMason encontrado = Object.FindFirstObjectByType<JugadorMason>();

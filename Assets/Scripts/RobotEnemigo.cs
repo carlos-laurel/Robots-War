@@ -37,6 +37,7 @@ public class RobotEnemigo : MonoBehaviour
         dibujo = GetComponent<SpriteRenderer>();
     }
 
+    [System.Obsolete]
     void Start()
     {
         JugadorMason encontrado = Object.FindFirstObjectByType<JugadorMason>();
