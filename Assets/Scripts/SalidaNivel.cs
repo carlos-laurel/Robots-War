@@ -5,7 +5,9 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Pequena animacion del final de nivel:
 /// Mason corre hasta la camioneta, se sube y la camioneta se marcha.
-/// Cuando la camioneta sale de pantalla se carga el siguiente nivel.
+/// Cuando la camioneta sale de pantalla se carga la siguiente escena.
+/// En el nivel del jefe la camioneta entra a buscarlo (vieneABuscarte)
+/// y al final se carga la pantalla de creditos.
 /// La coloca y la configura la herramienta "Aura / 4. Aplicar mejoras a las escenas".
 /// </summary>
 public class SalidaNivel : MonoBehaviour
@@ -19,19 +21,32 @@ public class SalidaNivel : MonoBehaviour
     public float segundosAcelerando = 0.9f;
     public float limiteDerecho = 96f;
 
+    [Header("Final del nivel del jefe")]
+    public bool vieneABuscarte = false;    // la camioneta entra y se para al lado de Mason
+    public float esperaInicial = 0f;       // deja ver la caida del jefe antes de arrancar
+    public bool esVictoriaFinal = false;   // la escena final tiene que mostrar los creditos
+    public string escenaFinal = "Reiniciar";
+
     private bool empezado;
 
     public void Iniciar(string escenaSiguiente)
     {
         if (empezado) return;
         empezado = true;
+
+        if (string.IsNullOrEmpty(escenaSiguiente)) escenaSiguiente = escenaFinal;
+
+        // El nivel ya termino: los robots y el jugador dejan de actuar
+        if (GestorJuego.instancia != null) GestorJuego.instancia.terminado = true;
+        if (esVictoriaFinal) GestorJuego.ultimaVictoria = true;
+
         StartCoroutine(Secuencia(escenaSiguiente));
     }
 
     private IEnumerator Secuencia(string escenaSiguiente)
     {
-        // El nivel ya termino: los robots y el jugador dejan de actuar
-        if (GestorJuego.instancia != null) GestorJuego.instancia.terminado = true;
+        // En el nivel del jefe se espera un poco para ver como cae
+        if (esperaInicial > 0f) yield return new WaitForSeconds(esperaInicial);
 
         if (jugador == null || camioneta == null)
         {
@@ -44,12 +59,38 @@ public class SalidaNivel : MonoBehaviour
         SpriteRenderer dibujo = jugador.GetComponent<SpriteRenderer>();
         Sprite[] correr = jugador.cuadrosCorrer;
 
+        // ---------------- 0. La camioneta entra a buscar a Mason ----------------
+        if (vieneABuscarte)
+        {
+            float destinoCamioneta = jugador.transform.position.x + 2.4f;
+            float tiempoLlegada = 0f;
+
+            while (camioneta.position.x > destinoCamioneta && tiempoLlegada < 6f)
+            {
+                tiempoLlegada += Time.deltaTime;
+
+                Vector3 pos = camioneta.position;
+                pos.x = Mathf.MoveTowards(pos.x, destinoCamioneta, velocidadCamioneta * Time.deltaTime);
+                camioneta.position = pos;
+
+                if (cuerpo != null) cuerpo.linearVelocity = Vector2.zero;
+
+                yield return null;
+            }
+        }
+
         // ---------------- 1. Mason corre hasta la camioneta ----------------
-        float destinoX = camioneta.position.x + 1.2f;
-        jugador.transform.localScale = new Vector3(-1f, 1f, 1f);   // mira hacia la camioneta
+        float destinoX = vieneABuscarte ? camioneta.position.x - 1.4f : camioneta.position.x + 1.2f;
+
+        // Mira hacia la camioneta: a la derecha si viene a buscarlo, a la izquierda si esta aparcada
+        jugador.transform.localScale = new Vector3(vieneABuscarte ? 1f : -1f, 1f, 1f);
+
+        // El tiempo de la carrerita se adapta a lo lejos que este la camioneta
+        float distancia = Mathf.Abs(jugador.transform.position.x - destinoX);
+        float tiempoMaximo = Mathf.Max(2.5f, distancia / 4.5f + 0.8f);
 
         float tiempo = 0f;
-        while (Mathf.Abs(jugador.transform.position.x - destinoX) > 0.1f && tiempo < 2.5f)
+        while (Mathf.Abs(jugador.transform.position.x - destinoX) > 0.1f && tiempo < tiempoMaximo)
         {
             tiempo += Time.deltaTime;
 
@@ -84,7 +125,7 @@ public class SalidaNivel : MonoBehaviour
             yield return null;
         }
 
-        // ---------------- 4. Siguiente nivel ----------------
+        // ---------------- 4. Siguiente escena ----------------
         SceneManager.LoadScene(escenaSiguiente);
     }
 }

@@ -329,7 +329,7 @@ public static class ConstructorJuego
         CrearBarraJefe(canvas.transform, jefe.GetComponent<JefeNucleo>());
         CrearGestor(raiz);
 
-        MejorasJuego.DecorarNivel(raiz, canvas, jugador, 3, "EL CLARO DEL NUCLEO", "", false, false, 50f);
+        MejorasJuego.DecorarNivel(raiz, canvas, jugador, 3, "EL CLARO DEL NUCLEO", "", false, true, 50f, true);
 
         if (musica != null) Musica(raiz, musica, 0.35f);
 

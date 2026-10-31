@@ -100,7 +100,20 @@ public class JefeNucleo : MonoBehaviour
         }
 
         // ---------------- El jefe ha caido ----------------
-        if (GestorJuego.instancia != null) GestorJuego.instancia.Victoria();
+        // Si el nivel tiene la camioneta de salida, Mason se sube a ella y se marcha:
+        // la pantalla de creditos se carga al final de esa animacion.
+        SalidaNivel salida = Object.FindAnyObjectByType<SalidaNivel>();
+        if (salida != null)
+        {
+            salida.esperaInicial = 1.5f;
+            salida.esVictoriaFinal = true;
+            salida.Iniciar("Reiniciar");
+        }
+        else if (GestorJuego.instancia != null)
+        {
+            GestorJuego.instancia.Victoria();
+        }
+
         Destroy(gameObject, 1.5f);
     }
 }

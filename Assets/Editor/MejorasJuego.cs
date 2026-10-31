@@ -34,7 +34,7 @@ public static class MejorasJuego
 
         ConfigNivel n1 = new ConfigNivel("Assets/Scenes/Nivel1.unity", 1, "EL BORDE DE LA SELVA", "Nivel2", true, true);
         ConfigNivel n2 = new ConfigNivel("Assets/Scenes/Nivel2.unity", 2, "LAS PROFUNDIDADES DE LA JUNGLA", "Nivel3", false, true);
-        ConfigNivel n3 = new ConfigNivel("Assets/Scenes/Nivel3.unity", 3, "EL CLARO DEL NUCLEO", "", false, false);
+        ConfigNivel n3 = new ConfigNivel("Assets/Scenes/Nivel3.unity", 3, "EL CLARO DEL NUCLEO", "", false, true, true);
 
         AplicarNivel(n1);
         AplicarNivel(n2);
@@ -52,7 +52,8 @@ public static class MejorasJuego
         AssetDatabase.Refresh();
 
         Debug.Log("[Mejoras] Escenas actualizadas: camara 5.625, disparo en 4 direcciones, dificultad mas baja, " +
-                  "tutorial de controles, texto de nivel y camioneta de salida.");
+                  "tutorial de controles, texto de nivel, camioneta de salida (tambien en el nivel del jefe) " +
+                  "y mas robots en los tres niveles.");
     }
 
     class ConfigNivel
@@ -63,8 +64,10 @@ public static class MejorasJuego
         public string escenaSiguiente;
         public bool tutorialVisible;
         public bool conCamioneta;
+        public bool camionetaViene;
 
-        public ConfigNivel(string ruta, int numero, string nombre, string escenaSiguiente, bool tutorialVisible, bool conCamioneta)
+        public ConfigNivel(string ruta, int numero, string nombre, string escenaSiguiente, bool tutorialVisible,
+            bool conCamioneta, bool camionetaViene = false)
         {
             this.ruta = ruta;
             this.numero = numero;
@@ -72,6 +75,7 @@ public static class MejorasJuego
             this.escenaSiguiente = escenaSiguiente;
             this.tutorialVisible = tutorialVisible;
             this.conCamioneta = conCamioneta;
+            this.camionetaViene = camionetaViene;
         }
     }
 
@@ -99,7 +103,7 @@ public static class MejorasJuego
         GameObject jugador = Buscar(raiz, "Mason");
 
         DecorarNivel(raiz, canvas, jugador, cfg.numero, cfg.nombre, cfg.escenaSiguiente,
-            cfg.tutorialVisible, cfg.conCamioneta, LimiteDerechoDe(camara));
+            cfg.tutorialVisible, cfg.conCamioneta, LimiteDerechoDe(camara), cfg.camionetaViene);
 
         EditorSceneManager.MarkSceneDirty(escena);
         EditorSceneManager.SaveScene(escena);
@@ -119,7 +123,7 @@ public static class MejorasJuego
     //  LO QUE SE APLICA A UN NIVEL (lo usa tambien ConstructorJuego)
     // =====================================================================
     public static void DecorarNivel(Transform raiz, Canvas canvas, GameObject jugador, int numero, string nombre,
-        string escenaSiguiente, bool tutorialVisible, bool conCamioneta, float limiteDerecho)
+        string escenaSiguiente, bool tutorialVisible, bool conCamioneta, float limiteDerecho, bool camionetaViene = false)
     {
         TMP_FontAsset fuente = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(R_FUENTE);
         Sprite camioneta = AssetDatabase.LoadAssetAtPath<Sprite>(R_CAMIONETA);
@@ -129,6 +133,7 @@ public static class MejorasJuego
             camioneta = AssetDatabase.LoadAssetAtPath<Sprite>(R_CAMIONETA);
         }
 
+        AgregarEnemigos(raiz, numero);
         BajarDificultad(raiz);
 
         if (canvas != null)
@@ -146,7 +151,94 @@ public static class MejorasJuego
         }
 
         if (conCamioneta && jugador != null && camioneta != null)
-            CrearCamioneta(raiz, camioneta, jugador, escenaSiguiente, limiteDerecho, meta);
+            CrearCamioneta(raiz, camioneta, jugador, escenaSiguiente, limiteDerecho, meta, camionetaViene);
+    }
+
+    // =====================================================================
+    //  MAS ENEMIGOS
+    // =====================================================================
+    // Posiciones nuevas (x). El robot se apoya siempre en el suelo o plataforma
+    // que exista de verdad en la escena, asi que funciona aunque se muevan las plataformas.
+    static readonly float[] EXTRA_NIVEL1 = { 22f, 38f, 50f, 66f };
+    static readonly float[] EXTRA_NIVEL2 = { -10f, 38f, 62f, 101f };
+    static readonly float[] EXTRA_NIVEL3 = { 4f, 14f, 30f };
+
+    static void AgregarEnemigos(Transform raiz, int numero)
+    {
+        if (raiz == null) return;
+
+        float[] posiciones = numero == 2 ? EXTRA_NIVEL2 : numero == 3 ? EXTRA_NIVEL3 : EXTRA_NIVEL1;
+
+        // Se copia un robot que ya existe en la escena: asi hereda sprites, bala y punto de disparo
+        RobotEnemigo modelo = null;
+        foreach (RobotEnemigo robot in raiz.GetComponentsInChildren<RobotEnemigo>(true))
+        {
+            modelo = robot;
+            break;
+        }
+
+        if (modelo == null)
+        {
+            Debug.LogWarning("[Mejoras] El nivel " + numero + " no tiene ningun robot del que copiar.");
+            return;
+        }
+
+        int creados = 0;
+        for (int i = 0; i < posiciones.Length; i++)
+        {
+            string nombre = "RobotExtra" + (i + 1);
+            GameObject existente = Buscar(raiz, nombre);
+
+            float suelo;
+            if (!AlturaDelSuelo(raiz, existente != null ? existente.transform.position.x : posiciones[i], out suelo))
+                continue;   // ahi hay un precipicio
+
+            if (existente != null)
+            {
+                // Ya estaba: solo se corrige la altura para que quede apoyado
+                existente.transform.position = new Vector3(existente.transform.position.x, suelo + 0.6f, 0f);
+                continue;
+            }
+
+            GameObject go = Object.Instantiate(modelo.gameObject);
+            go.name = nombre;
+            go.transform.SetParent(raiz, true);
+            go.transform.position = new Vector3(posiciones[i], suelo + 0.6f, 0f);
+            go.transform.localScale = Vector3.one;
+
+            creados++;
+        }
+
+        if (creados > 0) Debug.Log("[Mejoras] Nivel " + numero + ": " + creados + " robots nuevos.");
+    }
+
+    // Altura de la superficie mas alta que hay en esa x (solo suelo y plataformas bajas)
+    static bool AlturaDelSuelo(Transform raiz, float x, out float altura)
+    {
+        altura = 0f;
+        bool encontrado = false;
+
+        foreach (Collider2D choque in raiz.GetComponentsInChildren<Collider2D>(true))
+        {
+            if (choque.isTrigger) continue;
+            if (choque.GetComponent<JugadorMason>() != null) continue;
+            if (choque.GetComponent<RobotEnemigo>() != null) continue;
+            if (choque.GetComponent<JefeNucleo>() != null) continue;
+            if (choque.GetComponent<SalidaNivel>() != null) continue;
+
+            Bounds caja = choque.bounds;
+            if (caja.size.x < 3f) continue;                                 // cajas, barriles y adornos no son suelo
+            if (x < caja.min.x + 0.4f || x > caja.max.x - 0.4f) continue;   // no pegado al borde de la plataforma
+            if (caja.max.y > -0.2f) continue;                               // solo suelo y plataformas bajas
+
+            if (!encontrado || caja.max.y > altura)
+            {
+                altura = caja.max.y;
+                encontrado = true;
+            }
+        }
+
+        return encontrado;
     }
 
     // =====================================================================
@@ -243,7 +335,7 @@ public static class MejorasJuego
     }
 
     static void CrearCamioneta(Transform raiz, Sprite sprite, GameObject jugador, string escenaSiguiente,
-        float limiteDerecho, GameObject meta)
+        float limiteDerecho, GameObject meta, bool vieneABuscarte)
     {
         GameObject existente = Buscar(raiz, "Camioneta");
         GameObject go = existente != null ? existente : new GameObject("Camioneta");
@@ -254,11 +346,18 @@ public static class MejorasJuego
         dibujo.sprite = sprite;
         dibujo.sortingOrder = 4;
 
-        // Se aparca un poco antes de la meta, sobre el suelo
-        float x = (meta != null) ? meta.transform.position.x - 6f : limiteDerecho - 6f;
-        go.transform.position = new Vector3(x, ALTO_SUELO, 0f);
-        go.transform.rotation = Quaternion.identity;
-        go.transform.localScale = Vector3.one;
+        // Se aparca un poco antes de la meta, sobre el suelo.
+        // En el nivel del jefe espera fuera de pantalla y luego entra a buscar a Mason.
+        if (existente == null)
+        {
+            float x = vieneABuscarte
+                ? limiteDerecho + 10f
+                : (meta != null ? meta.transform.position.x - 6f : limiteDerecho - 6f);
+
+            go.transform.position = new Vector3(x, ALTO_SUELO, 0f);
+            go.transform.rotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
+        }
 
         SalidaNivel salida = go.GetComponent<SalidaNivel>();
         if (salida == null) salida = go.AddComponent<SalidaNivel>();
@@ -268,6 +367,10 @@ public static class MejorasJuego
         salida.limiteDerecho = limiteDerecho;
         salida.velocidadCamioneta = 13f;
         salida.segundosAcelerando = 0.9f;
+        salida.vieneABuscarte = vieneABuscarte;
+        salida.esVictoriaFinal = vieneABuscarte;
+        salida.esperaInicial = vieneABuscarte ? 1.5f : 0f;
+        salida.escenaFinal = "Reiniciar";
     }
 
     // =====================================================================
