@@ -6,7 +6,9 @@ using UnityEngine.InputSystem;
 /// Solo teclado:
 ///   A / flecha izquierda  -> caminar a la izquierda
 ///   D / flecha derecha    -> caminar a la derecha
-///   Espacio o W           -> saltar
+///   Espacio               -> saltar
+///   W / flecha arriba     -> apuntar hacia arriba
+///   S / flecha abajo      -> apuntar hacia abajo
 ///   J o Ctrl izquierdo    -> disparar
 /// </summary>
 public class JugadorMason : MonoBehaviour
@@ -14,10 +16,12 @@ public class JugadorMason : MonoBehaviour
     [Header("Movimiento")]
     public float velocidad = 6.5f;
     public float fuerzaSalto = 9.5f;
+    public float tiempoCoyote = 0.12f;        // margen para saltar justo despues de dejar el borde
+    public float tiempoBufferSalto = 0.12f;   // margen si se pulsa salto un poco antes de tocar el suelo
 
     [Header("Disparo")]
     public GameObject prefabBala;
-    public Transform puntoDisparo;
+    public Transform puntoDisparo;            // referencia de editor: el origen real se calcula con la direccion
     public float cadencia = 0.22f;
 
     [Header("Municion")]
@@ -58,6 +62,9 @@ public class JugadorMason : MonoBehaviour
     private bool mirandoDerecha = true;
     private bool enSuelo;
 
+    private float tiempoSinSuelo;
+    private float tiempoSaltoPedido;
+
     // control interno de la animacion
     private Sprite[] listaActual;
     private int indice;
@@ -71,6 +78,16 @@ public class JugadorMason : MonoBehaviour
         miCollider = GetComponent<Collider2D>();
         vida = vidaMaxima;
         municion = municionMaxima;
+
+        // El jugador no tiene rozamiento: asi no se queda pegado a las paredes,
+        // a las cajas ni a los bordes de las plataformas al saltar.
+        if (miCollider != null)
+        {
+            PhysicsMaterial2D sinRoce = new PhysicsMaterial2D("MasonSinRozamiento");
+            sinRoce.friction = 0f;
+            sinRoce.bounciness = 0f;
+            miCollider.sharedMaterial = sinRoce;
+        }
     }
 
     void Update()
@@ -94,17 +111,24 @@ public class JugadorMason : MonoBehaviour
 
         // ---------------- 3. Saber si esta tocando el suelo ----------------
         enSuelo = HaySuelo();
+        if (enSuelo) tiempoSinSuelo = 0f;
+        else tiempoSinSuelo += Time.deltaTime;
 
         // ---------------- 4. Saltar ----------------
-        if ((teclado.spaceKey.wasPressedThisFrame || teclado.wKey.wasPressedThisFrame) && enSuelo)
+        if (teclado.spaceKey.wasPressedThisFrame) tiempoSaltoPedido = tiempoBufferSalto;
+        else if (tiempoSaltoPedido > 0f) tiempoSaltoPedido -= Time.deltaTime;
+
+        if (tiempoSaltoPedido > 0f && tiempoSinSuelo <= tiempoCoyote)
         {
+            tiempoSaltoPedido = 0f;
+            tiempoSinSuelo = tiempoCoyote + 1f;   // ya no puede volver a saltar en el aire
             cuerpo.linearVelocity = new Vector2(cuerpo.linearVelocity.x, fuerzaSalto);
             Sonar(sonidoSalto);
         }
 
         // ---------------- 5. Disparar (solo con municion) ----------------
         if ((teclado.jKey.isPressed || teclado.leftCtrlKey.isPressed) && municion > 0 && Time.time >= ultimoDisparo + cadencia)
-            Disparar();
+            Disparar(teclado);
 
         // ---------------- 6. Mover ----------------
         cuerpo.linearVelocity = new Vector2(horizontal * velocidad, cuerpo.linearVelocity.y);
@@ -120,36 +144,58 @@ public class JugadorMason : MonoBehaviour
         if (transform.position.y < alturaDeMuerte) MorirDeCaida();
     }
 
-    // Comprueba si hay algo solido justo debajo de los pies
+    // Comprueba si hay una superficie solida justo debajo de los pies.
+    // Solo cuenta como suelo lo que tiene la cara hacia arriba: las paredes
+    // y las cajas pegadas de lado ya no cuentan y el salto no se queda trabado.
     private bool HaySuelo()
     {
-        Vector2 centro = new Vector2(transform.position.x, transform.position.y - 0.6f);
-        Collider2D[] choques = Physics2D.OverlapBoxAll(centro, new Vector2(0.5f, 0.15f), 0f);
+        Vector2 centro = new Vector2(transform.position.x, transform.position.y - 0.5f);
+        Vector2 tamano = new Vector2(0.4f, 0.1f);
 
-        foreach (Collider2D c in choques)
+        RaycastHit2D[] golpes = Physics2D.BoxCastAll(centro, tamano, 0f, Vector2.down, 0.14f);
+
+        foreach (RaycastHit2D golpe in golpes)
         {
-            if (c == miCollider) continue;
-            if (c.isTrigger) continue;
+            if (golpe.collider == null) continue;
+            if (golpe.collider.isTrigger) continue;
+            if (golpe.collider == miCollider) continue;
+            if (golpe.rigidbody == cuerpo) continue;
+            if (golpe.normal.y < 0.5f) continue;   // una pared no es suelo
+
             return true;
         }
+
         return false;
     }
 
-    private void Disparar()
+    // Direccion del disparo: arriba, abajo, izquierda o derecha
+    private Vector2 DireccionApuntado(Keyboard teclado)
+    {
+        bool arriba = teclado.wKey.isPressed || teclado.upArrowKey.isPressed;
+        bool abajo = teclado.sKey.isPressed || teclado.downArrowKey.isPressed;
+
+        if (arriba) return Vector2.up;
+        if (abajo) return Vector2.down;
+
+        return mirandoDerecha ? Vector2.right : Vector2.left;
+    }
+
+    private void Disparar(Keyboard teclado)
     {
         ultimoDisparo = Time.time;
         tiempoPoseDisparo = 0.16f;
         municion--;
 
-        Vector2 direccion = mirandoDerecha ? Vector2.right : Vector2.left;
+        Vector2 direccion = DireccionApuntado(teclado);
 
         CrearBala(direccion);
 
         // Si cogio una caja de municion, dispara en abanico de tres balas
         if (tiempoArmaMejorada > 0f)
         {
-            CrearBala((direccion + Vector2.up * 0.45f).normalized);
-            CrearBala((direccion + Vector2.down * 0.45f).normalized);
+            Vector2 lado = new Vector2(-direccion.y, direccion.x);
+            CrearBala((direccion + lado * 0.45f).normalized);
+            CrearBala((direccion - lado * 0.45f).normalized);
         }
 
         Sonar(sonidoDisparo);
@@ -157,9 +203,13 @@ public class JugadorMason : MonoBehaviour
 
     private void CrearBala(Vector2 direccion)
     {
-        if (prefabBala == null || puntoDisparo == null) return;
+        if (prefabBala == null) return;
 
-        GameObject bala = Instantiate(prefabBala, puntoDisparo.position, Quaternion.identity);
+        // La bala nace delante de Mason en la direccion apuntada
+        Vector2 origen = (Vector2)transform.position + direccion * 0.7f;
+        float giro = Mathf.Atan2(direccion.y, direccion.x) * Mathf.Rad2Deg;
+
+        GameObject bala = Instantiate(prefabBala, origen, Quaternion.Euler(0f, 0f, giro));
         Bala script = bala.GetComponent<Bala>();
         if (script != null) script.Configurar(direccion, true, 1);
     }

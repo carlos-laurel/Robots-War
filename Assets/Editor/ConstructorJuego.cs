@@ -201,6 +201,8 @@ public static class ConstructorJuego
         CrearHud(canvas.transform, jugador.GetComponent<JugadorMason>());
         CrearGestor(raiz);
 
+        MejorasJuego.DecorarNivel(raiz, canvas, jugador, 1, "EL BORDE DE LA SELVA", "Nivel2", true, true, 96f);
+
         if (musica != null) Musica(raiz, musica, 0.3f);
 
         EditorSceneManager.SaveScene(escena, "Assets/Scenes/Nivel1.unity");
@@ -267,6 +269,8 @@ public static class ConstructorJuego
         CrearHud(canvas.transform, jugador.GetComponent<JugadorMason>());
         CrearGestor(raiz);
 
+        MejorasJuego.DecorarNivel(raiz, canvas, jugador, 2, "LAS PROFUNDIDADES DE LA JUNGLA", "Nivel3", false, true, 118f);
+
         if (musica != null) Musica(raiz, musica, 0.3f);
 
         EditorSceneManager.SaveScene(escena, "Assets/Scenes/Nivel2.unity");
@@ -324,6 +328,8 @@ public static class ConstructorJuego
         CrearHud(canvas.transform, jugador.GetComponent<JugadorMason>());
         CrearBarraJefe(canvas.transform, jefe.GetComponent<JefeNucleo>());
         CrearGestor(raiz);
+
+        MejorasJuego.DecorarNivel(raiz, canvas, jugador, 3, "EL CLARO DEL NUCLEO", "", false, false, 50f);
 
         if (musica != null) Musica(raiz, musica, 0.35f);
 

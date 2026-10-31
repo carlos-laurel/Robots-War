@@ -170,5 +170,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00a7a03da93a3524da529104f4e16700, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bala
-  velocidad: 9
+  velocidad: 7
   duracion: 3
