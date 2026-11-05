@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>
+
 /// Control del protagonista (Mason).
 /// Solo teclado:
 ///   A / flecha izquierda  -> caminar a la izquierda
@@ -10,7 +10,7 @@ using UnityEngine.InputSystem;
 ///   W / flecha arriba     -> apuntar hacia arriba
 ///   S / flecha abajo      -> apuntar hacia abajo
 ///   J o Ctrl izquierdo    -> disparar
-/// </summary>
+
 public class JugadorMason : MonoBehaviour
 {
     [Header("Movimiento")]

@@ -1,13 +1,13 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
+
 /// Se encarga del final del nivel.
 ///  - GameOver(): el jugador murio -> se carga la escena de derrota.
 ///  - Victoria(): el jefe cayo -> se carga la escena de creditos.
 /// En los dos casos la escena final es "Reiniciar", donde se pulsa
 /// cualquier tecla para volver al titulo.
-/// </summary>
+
 public class GestorJuego : MonoBehaviour
 {
     public static GestorJuego instancia;

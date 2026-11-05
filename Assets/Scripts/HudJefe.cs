@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
+
 /// Barra de vida del jefe final. Solo se usa en el nivel del Nucleo.
 /// La parte roja se encoge segun la vida que le queda.
-/// </summary>
+
 public class HudJefe : MonoBehaviour
 {
     public JefeNucleo jefe;

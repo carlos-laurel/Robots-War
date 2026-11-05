@@ -2,11 +2,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-/// <summary>
+
 /// Pantalla de fin de partida (escena "Reiniciar").
 /// Si el jugador gano al jefe enseña los creditos; si perdio, la pantalla de derrota.
 /// Al pulsar cualquier tecla vuelve al titulo.
-/// </summary>
+
 public class PantallaFinal : MonoBehaviour
 {
     public GameObject panelDerrota;

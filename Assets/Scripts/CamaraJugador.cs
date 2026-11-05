@@ -1,11 +1,11 @@
 using UnityEngine;
 
-/// <summary>
+
 /// La camara sigue al jugador de izquierda a derecha
 /// y se detiene en los bordes del nivel (limiteIzquierdo / limiteDerecho).
 /// Los limites son los bordes del nivel: la camara se separa de ellos media
 /// pantalla, calculada con el tamaño ortografico y el aspecto actual.
-/// </summary>
+
 public class CamaraJugador : MonoBehaviour
 {
     public Transform objetivo;

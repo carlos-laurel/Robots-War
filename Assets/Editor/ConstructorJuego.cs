@@ -6,11 +6,8 @@ using UnityEngine.Rendering.Universal;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-/// <summary>
 /// Herramienta de editor que construye prefabs y las 4 escenas del juego
 /// usando el arte que ya estaba en Assets/SpriteSheets.
-/// Menu: Aura -> 1 y 2.
-/// </summary>
 public static class ConstructorJuego
 {
     // ---------- Ajustes generales ----------

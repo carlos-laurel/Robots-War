@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
+
 /// Zona invisible que hay al final de cada nivel.
 /// Cuando el jugador la toca se lanza la animacion de salida
 /// (Mason se sube a la camioneta y se marcha) y despues se carga el siguiente nivel.
-/// </summary>
+
 public class MetaNivel : MonoBehaviour
 {
     public string escenaSiguiente = "Nivel2";

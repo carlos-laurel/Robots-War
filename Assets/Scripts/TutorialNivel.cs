@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>
+
 /// Mini tutorial con los controles del juego.
 /// Aparece al empezar el nivel, se esconde solo y se vuelve a abrir con la tecla H.
-/// </summary>
+
 public class TutorialNivel : MonoBehaviour
 {
     public GameObject panel;

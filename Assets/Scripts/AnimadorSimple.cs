@@ -1,10 +1,10 @@
 using UnityEngine;
 
-/// <summary>
+
 /// Cambia los sprites de un SpriteRenderer uno detras de otro.
 /// Sirve para animar cosas sin usar el sistema Animator, que es mas complicado.
 /// Se puede usar desde el inspector o desde otro script.
-/// </summary>
+
 public class AnimadorSimple : MonoBehaviour
 {
     [Header("Animacion")]

@@ -2,14 +2,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
+
 /// Pequena animacion del final de nivel:
 /// Mason corre hasta la camioneta, se sube y la camioneta se marcha.
 /// Cuando la camioneta sale de pantalla se carga la siguiente escena.
 /// En el nivel del jefe la camioneta entra a buscarlo (vieneABuscarte)
 /// y al final se carga la pantalla de creditos.
 /// La coloca y la configura la herramienta "Aura / 4. Aplicar mejoras a las escenas".
-/// </summary>
+
 public class SalidaNivel : MonoBehaviour
 {
     [Header("Quien participa")]

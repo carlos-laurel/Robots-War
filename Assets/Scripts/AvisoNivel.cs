@@ -2,10 +2,10 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-/// <summary>
+
 /// Cartel grande con el nombre del nivel. Sale al empezar la escena,
 /// se queda unos segundos y se desvanece solo.
-/// </summary>
+
 public class AvisoNivel : MonoBehaviour
 {
     public TextMeshProUGUI texto;

@@ -1,10 +1,10 @@
 using UnityEngine;
 
-/// <summary>
+
 /// Objetos que el jugador recoge al tocarlos.
 ///  - Vida     -> recupera vida (botiquin).
 ///  - Municion -> recarga balas y mejora el arma durante unos segundos.
-/// </summary>
+
 public class ObjetoRecogible : MonoBehaviour
 {
     public enum Tipo

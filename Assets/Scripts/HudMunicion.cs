@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Barra de municion del HUD. El relleno amarillo se encoge
-/// segun las balas que le quedan al jugador.
-/// </summary>
+
+//Barra de municion del HUD. El relleno amarillo se encoge
+//segun las balas que le quedan al jugador.
+
 public class HudMunicion : MonoBehaviour
 {
     public JugadorMason jugador;

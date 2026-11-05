@@ -1,9 +1,9 @@
 using UnityEngine;
 
-/// <summary>
+
 /// Robot basico de patrulla. Mira al jugador y le dispara cuando esta cerca.
 /// Al quedarse sin vida se destruye (antes se ve su animacion de muerte).
-/// </summary>
+
 public class RobotEnemigo : MonoBehaviour
 {
     [Header("Vida")]

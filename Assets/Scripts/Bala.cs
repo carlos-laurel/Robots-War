@@ -1,9 +1,9 @@
 using UnityEngine;
 
-/// <summary>
+
 /// Bala generica. Sirve tanto para Mason como para los robots.
 /// Se mueve sola en linea recta y hace dano a quien corresponda.
-/// </summary>
+
 public class Bala : MonoBehaviour
 {
     public float velocidad = 14f;
@@ -13,9 +13,9 @@ public class Bala : MonoBehaviour
     private bool esDelJugador = true;
     private int dano = 1;
 
-    /// <summary>
+   
     /// Se llama justo despues de crear la bala para decirle hacia donde va.
-    /// </summary>
+    
     public void Configurar(Vector2 nuevaDireccion, bool delJugador, int cantidadDano)
     {
         direccion = nuevaDireccion.normalized;

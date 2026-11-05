@@ -1,10 +1,10 @@
 using UnityEngine;
 
-/// <summary>
+
 /// Jefe final "El Nucleo".
 /// Se balancea arriba y abajo y dispara un abanico de tres proyectiles al jugador.
 /// Cuando se queda sin vida se muestra la pantalla de creditos.
-/// </summary>
+
 public class JefeNucleo : MonoBehaviour
 {
     [Header("Vida")]

@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-/// <summary>
+
 /// Pantalla de titulo. Al pulsar cualquier tecla empieza el juego.
-/// </summary>
+
 public class MenuPrincipal : MonoBehaviour
 {
     public string escenaJuego = "Nivel1";

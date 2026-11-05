@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 
-/// <summary>
+
 /// Aplica a las escenas que YA existen los cambios pedidos, sin reconstruirlas:
 ///  - camara ortografica a 5.625
 ///  - dificultad mas baja (menos cadencia y menos vida en robots y jefe, bala enemiga mas lenta)
@@ -13,7 +13,7 @@ using TMPro;
 ///  - texto permanente con el nivel actual + cartel grande al empezar
 ///  - camioneta del final (Ranger Open) y su animacion de salida
 /// Menu: Aura -> 4.
-/// </summary>
+
 public static class MejorasJuego
 {
     public const float TAMANO_CAMARA = 5.625f;

@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
+
 /// Dibuja los iconos de vida en la esquina de la pantalla.
 /// Se le pasa el jugador y los dos sprites (vida llena / vida vacia).
-/// </summary>
+
 public class HudVidas : MonoBehaviour
 {
     public JugadorMason jugador;
